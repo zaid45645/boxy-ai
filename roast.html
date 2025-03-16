@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boxy AI | Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='roast.css') }}">
+    <link rel="stylesheet" href="static\roast.css">
+
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <h3>Boxy AI</h3>
+                <li><a href="/roast">Home</a></li>
+                <li><a href="https://hackclub.com/">HackClub!</a></li>
+                <li><a href="/login">Register for Boxy AI</a></li>
+            </ul>
+        </nav>
+    </header><img src="https://assets.hackclub.com/flag-orpheus-top.svg" alt="Hack Club Orpheus Flag" width="200" height="100"><br><br>
+
+    <div class="first-cont">
+        <h1> Boxy AI </h1>
+        <form id="roast-form">
+            <input type="text" id="user-input" name="input" placeholder="Ask your question here!" required>
+            <button type="submit" id="submit-btn">Ask?!</button>
+        </form>
+
+        <p id="response"></p>
+    </div>
+
+    <script>
+        document.getElementById("roast-form").onsubmit = function(event) {
+            event.preventDefault();
+            
+            let userInput = document.getElementById("user-input").value;
+            let responseField = document.getElementById("response");
+            let submitButton = document.getElementById("submit-btn");
+
+            if (!userInput.trim()) {
+                alert("Enter something to roast!");
+                return;
+            }
+
+            submitButton.disabled = true;
+            responseField.innerText = "Thinking of a response";
+
+            fetch("/roast", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_input: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let roastText = data.response;
+                responseField.innerText = roastText; 
+                speak(roastText); 
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                responseField.innerText = "Oops! Something went wrong.";
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                document.getElementById("user-input").value = ""; 
+            });
+        };
+
+        function speak(text) {
+            let speech = new SpeechSynthesisUtterance(text);
+            speech.lang = "en-US";
+            speech.pitch = 1;
+            speech.rate = 1;
+            window.speechSynthesis.speak(speech);
+        }
+    </script>
+</body>
+</html>
